@@ -43,8 +43,9 @@ public class YgoApiClient {
             int atk = json.optInt("atk", -1);
             int def = json.optInt("def", -1);
 
-            // Descarta cartas sin ATK o DEF
-            if (type.contains("Monster") && atk >= 0 && def >= 0) {
+            // Solo cartas que pueden atacar y defender: se descartan Spell/Trap, Link (sin DEF)
+            // y las que la API reporta con ATK o DEF en 0 (valores "?" o sin defensa real)
+            if (type.contains("Monster") && atk > 0 && def > 0) {
                 String name = json.getString("name");
                 String imageUrl = json.getJSONArray("card_images")
                         .getJSONObject(0)

@@ -10,6 +10,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import yugioh.api.YgoApiClient;
 import yugioh.listener.BattleListener;
@@ -175,6 +178,17 @@ public class MainWindow implements BattleListener {
         final List<ImageIcon> aiImages = new ArrayList<>();
     }
 
+    /* Una carta ya descargada junto con su imagen (la imagen puede ser null). */
+    private static class LoadedCard {
+        final Card card;
+        final ImageIcon image;
+
+        LoadedCard(Card card, ImageIcon image) {
+            this.card = card;
+            this.image = image;
+        }
+    }
+
     public MainWindow() {
         playerPanels = new CardPanel[]{playerCard1, playerCard2, playerCard3};
         aiPanels = new CardPanel[]{aiCard1, aiCard2, aiCard3};
@@ -231,16 +245,31 @@ public class MainWindow implements BattleListener {
         new SwingWorker<LoadedCards, Void>() {
             @Override
             protected LoadedCards doInBackground() throws Exception {
-                LoadedCards data = new LoadedCards();
-                for (int i = 0; i < 3; i++) {
-                    Card p = api.getRandomMonster();
-                    data.playerCards.add(p);
-                    data.playerImages.add(cargarImagen(p.getImageUrl()));
-                    Card a = api.getRandomMonster();
-                    data.aiCards.add(a);
-                    data.aiImages.add(cargarImagen(a.getImageUrl()));
+                // Las 6 cartas no dependen entre sí: se piden a la vez para que cargue más rápido
+                ExecutorService pool = Executors.newFixedThreadPool(6);
+                try {
+                    List<Future<LoadedCard>> futures = new ArrayList<>();
+                    for (int i = 0; i < 6; i++) {
+                        futures.add(pool.submit(() -> {
+                            Card card = api.getRandomMonster();
+                            return new LoadedCard(card, cargarImagen(card.getImageUrl()));
+                        }));
+                    }
+                    LoadedCards data = new LoadedCards();
+                    for (int i = 0; i < 6; i++) {
+                        LoadedCard loaded = futures.get(i).get();
+                        // Las 3 primeras son del jugador y las 3 últimas de la máquina
+                        (i < 3 ? data.playerCards : data.aiCards).add(loaded.card);
+                        (i < 3 ? data.playerImages : data.aiImages).add(loaded.image);
+                    }
+                    return data;
+                } catch (ExecutionException e) {
+                    // Se relanza la causa real (p. ej. IOException) para mostrar el error correcto
+                    if (e.getCause() instanceof Exception) throw (Exception) e.getCause();
+                    throw e;
+                } finally {
+                    pool.shutdownNow();
                 }
-                return data;
             }
 
             @Override
