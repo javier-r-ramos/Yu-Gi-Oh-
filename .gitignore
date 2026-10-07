@@ -1,4 +1,5 @@
 target/
-.idea/workspace.xml
+out/
+.idea/
 *.class
 .DS_Store

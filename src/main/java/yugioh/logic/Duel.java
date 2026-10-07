@@ -83,6 +83,7 @@ public class Duel {
     }
 
     public List<Card> getPlayerHand() { return playerHand; }
+    public List<Card> getAiHand() { return aiHand; }
     public boolean isPlayerStarts() { return playerStarts; }
     public boolean isFinished() { return finished; }
 }

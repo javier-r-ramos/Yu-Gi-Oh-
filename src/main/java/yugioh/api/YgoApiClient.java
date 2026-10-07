@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import org.json.JSONObject;
 import yugioh.model.Card;
 
@@ -15,17 +16,23 @@ public class YgoApiClient {
 
     private final HttpClient client = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NORMAL)
+            .connectTimeout(Duration.ofSeconds(10))
             .build();
     //Pide cartas hasta obtener un Monster con ATK y DEF válidos.
     public Card getRandomMonster() throws IOException, InterruptedException {
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(URL))
+                    .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();
 
             HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new IOException("La API respondió con código " + response.statusCode());
+            }
 
             JSONObject json = new JSONObject(response.body())
                     .getJSONArray("data")
@@ -40,7 +47,7 @@ public class YgoApiClient {
                 String name = json.getString("name");
                 String imageUrl = json.getJSONArray("card_images")
                         .getJSONObject(0)
-                        .getString("image_url");
+                        .getString("image_url_small");
                 return new Card(name, atk, def, imageUrl);
             }
         }

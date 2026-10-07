@@ -1,8 +1,20 @@
 package yugioh.ui;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import yugioh.api.YgoApiClient;
+import yugioh.listener.BattleListener;
+import yugioh.logic.Duel;
+import yugioh.model.Card;
 
 /*
 Ventana principal del duelo: controles arriba, cartas de la máquina y del
@@ -20,7 +32,7 @@ rchivo IntelliJ genera automáticamente el método $$$setupUI$$$(), que:
 
  No se debe editar $$$setupUI$$$() a mano: se reescribe al guardar el .form.
  */
-public class MainWindow {
+public class MainWindow implements BattleListener {
     /*Panel raíz de la ventana. */
     private JPanel mainPanel;
 
@@ -143,6 +155,182 @@ public class MainWindow {
      */
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
+    }
+
+    // ---- Comportamiento (fuera del código generado por el diseñador) ----
+
+    private final YgoApiClient api = new YgoApiClient();
+    private CardPanel[] playerPanels;
+    private CardPanel[] aiPanels;
+    private JRadioButton rbAtaque;
+    private JRadioButton rbDefensa;
+    private Duel duel;
+    private int ronda;
+
+    /* Datos que se descargan en segundo plano antes de empezar el duelo. */
+    private static class LoadedCards {
+        final List<Card> playerCards = new ArrayList<>();
+        final List<Card> aiCards = new ArrayList<>();
+        final List<ImageIcon> playerImages = new ArrayList<>();
+        final List<ImageIcon> aiImages = new ArrayList<>();
+    }
+
+    public MainWindow() {
+        playerPanels = new CardPanel[]{playerCard1, playerCard2, playerCard3};
+        aiPanels = new CardPanel[]{aiCard1, aiCard2, aiCard3};
+
+        // El enunciado pide ataque/defensa: se elige con estos botones antes de elegir la carta
+        rbAtaque = new JRadioButton("Ataque", true);
+        rbDefensa = new JRadioButton("Defensa");
+        ButtonGroup modo = new ButtonGroup();
+        modo.add(rbAtaque);
+        modo.add(rbDefensa);
+        topPanel.add(new JLabel("Modo:"));
+        topPanel.add(rbAtaque);
+        topPanel.add(rbDefensa);
+        lblGanador.setFont(lblGanador.getFont().deriveFont(Font.BOLD, 16f));
+        lblEstado.setText("Pulsa \"Iniciar duelo\" para empezar.");
+
+        for (CardPanel panel : aiPanels) {
+            panel.setChooseVisible(false); // la máquina elige sola
+            panel.clear();
+        }
+        for (CardPanel panel : playerPanels) {
+            panel.clear();
+            panel.addChooseListener(e -> elegirCarta(panel)); // ActionListener "Elegir carta"
+        }
+        btnIniciarDuelo.addActionListener(e -> iniciarDuelo()); // ActionListener "Iniciar duelo"
+    }
+
+    /* Crea el JFrame, le pone el panel principal y lo muestra. */
+    public void mostrar() {
+        JFrame frame = new JFrame("Yu-Gi-Oh! Duel Lite");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setContentPane(mainPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    /* Descarga 3 cartas por bando SIN bloquear el hilo de la interfaz (SwingWorker). */
+    private void iniciarDuelo() {
+        btnIniciarDuelo.setEnabled(false);
+        txtLog.setText("");
+        lblGanador.setText("");
+        lblPuntaje.setText("Jugador 0 - 0 Máquina");
+        lblEstado.setForeground(UIManager.getColor("Label.foreground"));
+        lblEstado.setText("Cargando cartas...");
+        for (CardPanel panel : playerPanels) panel.clear();
+        for (CardPanel panel : aiPanels) panel.clear();
+        duel = null;
+
+        new SwingWorker<LoadedCards, Void>() {
+            @Override
+            protected LoadedCards doInBackground() throws Exception {
+                LoadedCards data = new LoadedCards();
+                for (int i = 0; i < 3; i++) {
+                    Card p = api.getRandomMonster();
+                    data.playerCards.add(p);
+                    data.playerImages.add(cargarImagen(p.getImageUrl()));
+                    Card a = api.getRandomMonster();
+                    data.aiCards.add(a);
+                    data.aiImages.add(cargarImagen(a.getImageUrl()));
+                }
+                return data;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    empezarDuelo(get());
+                } catch (ExecutionException e) {
+                    mostrarError(e.getCause());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    mostrarError(e);
+                }
+            }
+        }.execute();
+    }
+
+    /* Descarga la imagen; si falla devuelve null y la carta se muestra sin imagen. */
+    private ImageIcon cargarImagen(String url) {
+        try {
+            BufferedImage img = ImageIO.read(URI.create(url).toURL());
+            return img == null ? null : new ImageIcon(img);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /* Ya están las 6 cartas: se muestran y se crea el duelo. */
+    private void empezarDuelo(LoadedCards data) {
+        duel = new Duel(data.playerCards, data.aiCards, this);
+        ronda = 0;
+        for (int i = 0; i < 3; i++) {
+            playerPanels[i].showCard(data.playerCards.get(i), data.playerImages.get(i));
+            playerPanels[i].setChooseEnabled(true);
+            aiPanels[i].showCard(data.aiCards.get(i), data.aiImages.get(i));
+        }
+        lblEstado.setText("Elige el modo y una de tus cartas.");
+        txtLog.append("Duelo iniciado. Empieza: "
+                + (duel.isPlayerStarts() ? Duel.PLAYER : Duel.AI) + "\n\n");
+    }
+
+    /* Se pulsó "Elegir carta" en una de las cartas del jugador. */
+    private void elegirCarta(CardPanel panel) {
+        if (duel == null || duel.isFinished()) return;
+        panel.markUsed();
+        duel.playRound(panel.getCard(), rbAtaque.isSelected());
+
+        // La carta que la máquina ya jugó deja de estar en su mano: se pone en gris
+        for (CardPanel ai : aiPanels) {
+            if (ai.getCard() != null && !duel.getAiHand().contains(ai.getCard())) {
+                ai.markUsed();
+            }
+        }
+    }
+
+    /* Error visible: "No se pudo cargar la carta" / "error de red". */
+    private void mostrarError(Throwable error) {
+        String detalle = error.getMessage() == null ? error.toString() : error.getMessage();
+        String mensaje = (error instanceof IOException)
+                ? "No se pudo cargar la carta (error de red): " + detalle
+                : "No se pudo cargar la carta: " + detalle;
+        lblEstado.setForeground(Color.RED);
+        lblEstado.setText(mensaje);
+        btnIniciarDuelo.setEnabled(true);
+        JOptionPane.showMessageDialog(mainPanel, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    // ---- BattleListener: la lógica avisa y la ventana pinta ----
+
+    @Override
+    public void onTurn(String playerCard, String aiCard, String winner) {
+        ronda++;
+        txtLog.append("--- Ronda " + ronda + " ---\n"
+                + "Jugador: " + playerCard + "\n"
+                + "Máquina: " + aiCard + "\n"
+                + "Resultado: " + (Duel.DRAW.equals(winner) ? "empate" : "gana " + winner) + "\n");
+        txtLog.setCaretPosition(txtLog.getDocument().getLength());
+    }
+
+    @Override
+    public void onScoreChanged(int playerScore, int aiScore) {
+        lblPuntaje.setText("Jugador " + playerScore + " - " + aiScore + " Máquina");
+        txtLog.append("Marcador: Jugador " + playerScore + " - " + aiScore + " Máquina\n\n");
+        txtLog.setCaretPosition(txtLog.getDocument().getLength());
+    }
+
+    @Override
+    public void onDuelEnded(String winner) {
+        String texto = Duel.DRAW.equals(winner) ? "¡Empate!" : "¡Ganador: " + winner + "!";
+        lblGanador.setText(texto);
+        lblEstado.setText("Duelo terminado.");
+        txtLog.append("=== " + texto + " ===\n");
+        txtLog.setCaretPosition(txtLog.getDocument().getLength());
+        for (CardPanel panel : playerPanels) panel.setChooseEnabled(false);
+        btnIniciarDuelo.setEnabled(true);
     }
 
 }

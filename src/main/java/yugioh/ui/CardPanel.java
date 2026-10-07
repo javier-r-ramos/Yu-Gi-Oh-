@@ -2,6 +2,8 @@ package yugioh.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import yugioh.model.Card;
 
 /*
  Vista de una carta: imagen, nombre, ATK, DEF y botón "Elegir carta".
@@ -75,6 +77,54 @@ public class CardPanel {
 
     public JComponent $$$getRootComponent$$$() {
         return rootPanel;
+    }
+
+    // ---- Comportamiento (fuera del código generado por el diseñador) ----
+
+    /* Carta que muestra este panel (null si está vacío). */
+    private Card card;
+
+    /* Muestra una carta con su imagen (si la imagen no cargó, se muestra un texto). */
+    public void showCard(Card card, ImageIcon image) {
+        this.card = card;
+        lblImagen.setEnabled(true);
+        lblImagen.setIcon(image);
+        lblImagen.setText(image == null ? "Sin imagen" : "");
+        lblNombre.setText("<html><div style='text-align:center;width:150px'>"
+                + escapeHtml(card.getName()) + "</div></html>");
+        lblAtk.setText("ATK: " + card.getAtk());
+        lblDef.setText("DEF: " + card.getDef());
+    }
+
+    /* Deja el panel vacío, como al abrir la aplicación. */
+    public void clear() {
+        card = null;
+        lblImagen.setEnabled(true);
+        lblImagen.setIcon(null);
+        lblImagen.setText("");
+        lblNombre.setText("Nombre");
+        lblAtk.setText("ATK: -");
+        lblDef.setText("DEF: -");
+        btnElegir.setEnabled(false);
+    }
+
+    /* Marca la carta como ya jugada: imagen en gris y botón deshabilitado. */
+    public void markUsed() {
+        lblImagen.setEnabled(false);
+        btnElegir.setEnabled(false);
+    }
+
+    public Card getCard() { return card; }
+
+    public void setChooseEnabled(boolean enabled) { btnElegir.setEnabled(enabled); }
+
+    /* Las cartas de la máquina no se eligen, por eso se les oculta el botón. */
+    public void setChooseVisible(boolean visible) { btnElegir.setVisible(visible); }
+
+    public void addChooseListener(ActionListener listener) { btnElegir.addActionListener(listener); }
+
+    private static String escapeHtml(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
 }
