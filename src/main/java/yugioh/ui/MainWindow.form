@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="yugioh.ui.MainWindow">
+  <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="1000" height="800"/>
+    </constraints>
+    <properties>
+      <preferredSize width="1000" height="800"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="b0001" binding="topPanel" layout-manager="FlowLayout" hgap="15" vgap="5" flow-align="1">
+        <constraints border-constraint="North"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="b0002" class="javax.swing.JButton" binding="btnIniciarDuelo">
+            <constraints/>
+            <properties>
+              <text value="Iniciar duelo"/>
+            </properties>
+          </component>
+          <component id="b0003" class="javax.swing.JLabel" binding="lblPuntaje">
+            <constraints/>
+            <properties>
+              <text value="Jugador 0 - 0 Máquina"/>
+            </properties>
+          </component>
+          <component id="b0004" class="javax.swing.JLabel" binding="lblGanador">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="b0005" class="javax.swing.JLabel" binding="lblEstado">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="b0010" binding="boardPanel" layout-manager="GridBagLayout">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="b0011" binding="aiCardsPanel" layout-manager="FlowLayout" hgap="20" vgap="5" flow-align="1">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="1.0" weighty="1.0"/>
+            </constraints>
+            <properties/>
+            <border type="etched" title="Cartas de la máquina"/>
+            <children>
+              <nested-form id="b0012" form-file="yugioh/ui/CardPanel.form" binding="aiCard1">
+                <constraints/>
+              </nested-form>
+              <nested-form id="b0013" form-file="yugioh/ui/CardPanel.form" binding="aiCard2">
+                <constraints/>
+              </nested-form>
+              <nested-form id="b0014" form-file="yugioh/ui/CardPanel.form" binding="aiCard3">
+                <constraints/>
+              </nested-form>
+            </children>
+          </grid>
+          <grid id="b0020" binding="playerCardsPanel" layout-manager="FlowLayout" hgap="20" vgap="5" flow-align="1">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="1.0" weighty="1.0"/>
+            </constraints>
+            <properties/>
+            <border type="etched" title="Tus cartas"/>
+            <children>
+              <nested-form id="b0021" form-file="yugioh/ui/CardPanel.form" binding="playerCard1">
+                <constraints/>
+              </nested-form>
+              <nested-form id="b0022" form-file="yugioh/ui/CardPanel.form" binding="playerCard2">
+                <constraints/>
+              </nested-form>
+              <nested-form id="b0023" form-file="yugioh/ui/CardPanel.form" binding="playerCard3">
+                <constraints/>
+              </nested-form>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <scrollpane id="b0030" binding="scrollLog">
+        <constraints border-constraint="East"/>
+        <properties>
+          <preferredSize width="320" height="0"/>
+        </properties>
+        <border type="etched" title="Log de batalla"/>
+        <children>
+          <component id="b0031" class="javax.swing.JTextArea" binding="txtLog">
+            <constraints/>
+            <properties>
+              <editable value="false"/>
+              <lineWrap value="true"/>
+              <wrapStyleWord value="true"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+    </children>
+  </grid>
+</form>
