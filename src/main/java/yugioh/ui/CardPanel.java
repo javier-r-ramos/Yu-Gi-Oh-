@@ -81,16 +81,25 @@ public class CardPanel {
 
     // ---- Comportamiento (fuera del código generado por el diseñador) ----
 
+    /* Tamaño con el que se dibuja la imagen (la de la API es de 168 x 246). */
+    private static final int IMG_W = 112;
+    private static final int IMG_H = 164;
+
     /* Carta que muestra este panel (null si está vacío). */
     private Card card;
+
+    public CardPanel() {
+        lblImagen.setPreferredSize(new Dimension(IMG_W, IMG_H));
+    }
 
     /* Muestra una carta con su imagen (si la imagen no cargó, se muestra un texto). */
     public void showCard(Card card, ImageIcon image) {
         this.card = card;
         lblImagen.setEnabled(true);
-        lblImagen.setIcon(image);
+        lblImagen.setIcon(image == null ? null : new ImageIcon(
+                image.getImage().getScaledInstance(IMG_W, IMG_H, Image.SCALE_SMOOTH)));
         lblImagen.setText(image == null ? "Sin imagen" : "");
-        lblNombre.setText("<html><div style='text-align:center;width:150px'>"
+        lblNombre.setText("<html><div style='text-align:center;width:130px'>"
                 + escapeHtml(card.getName()) + "</div></html>");
         lblAtk.setText("ATK: " + card.getAtk());
         lblDef.setText("DEF: " + card.getDef());

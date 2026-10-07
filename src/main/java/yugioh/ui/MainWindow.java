@@ -206,8 +206,12 @@ public class MainWindow implements BattleListener {
     public void mostrar() {
         JFrame frame = new JFrame("Yu-Gi-Oh! Duel Lite");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        mainPanel.setPreferredSize(new Dimension(960, 640));
         frame.setContentPane(mainPanel);
         frame.pack();
+        // Nunca más grande que la pantalla disponible
+        Rectangle pantalla = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        frame.setSize(Math.min(frame.getWidth(), pantalla.width), Math.min(frame.getHeight(), pantalla.height));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

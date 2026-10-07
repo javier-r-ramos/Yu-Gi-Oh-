@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import yugioh.model.Card;
 
 
+/** Cliente de la API YGOProDeck: pide cartas al azar y las convierte en objetos Card. */
 public class YgoApiClient {
     private static final String URL = "https://db.ygoprodeck.com/api/v7/randomcard.php";
     private static final int MAX_ATTEMPTS = 10;

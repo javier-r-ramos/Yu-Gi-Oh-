@@ -7,6 +7,10 @@ import java.util.Random;
 import yugioh.listener.BattleListener;
 import yugioh.model.Card;
 
+/**
+ * Reglas del duelo: 3 cartas por bando, una carta por ronda y gana quien
+ * consiga primero 2 rondas. No conoce Swing; solo avisa a un BattleListener.
+ */
 public class Duel {
     public static final String PLAYER = "Jugador";
     public static final String AI = "Máquina";
@@ -33,6 +37,7 @@ public class Duel {
         this.playerStarts = random.nextBoolean();
     }
 
+    /** Juega una ronda: el jugador elige carta y modo; la máquina elige ambos al azar. */
     public void playRound(Card playerCard, boolean playerAttacks) {
         if (finished) {
             throw new IllegalStateException("El duelo ya terminó");
@@ -64,6 +69,7 @@ public class Duel {
         }
     }
 
+    /** Devuelve >0 si gana el jugador, <0 si gana la máquina y 0 si empatan. */
     private int resolve(Card p, boolean pAttacks, Card a, boolean aAttacks) {
         if (pAttacks && aAttacks) return Integer.compare(p.getAtk(), a.getAtk());
         if (pAttacks) return Integer.compare(p.getAtk(), a.getDef());
