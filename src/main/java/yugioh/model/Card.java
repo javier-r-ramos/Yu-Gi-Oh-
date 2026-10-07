@@ -1,6 +1,6 @@
 package yugioh.model;
 
-/** Modelo de una carta Monster: nombre, puntos de ataque/defensa e imagen oficial. */
+//Modelo de una carta Monster: nombre, puntos de ataque/defensa e imagen oficial.
 public class Card
 {
     private final String name;

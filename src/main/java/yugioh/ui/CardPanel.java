@@ -17,17 +17,17 @@ import yugioh.model.Card;
 Esta misma vista se usa para las cartas del jugador y de la máquina.
  */
 public class CardPanel {
-    /* Panel raíz de la carta; es el que se inserta en la ventana principal. */
+    //Panel raíz de la carta; es el que se inserta en la ventana principal.
     private JPanel rootPanel;
-    /* Imagen oficial de la carta (168 x 246 px, tamaño de la imagen pequeña de la API). */
+    //Imagen oficial de la carta (168 x 246 px, tamaño de la imagen pequeña de la API).
     private JLabel lblImagen;
-    /* Nombre de la carta. */
+    //Nombre de la carta
     private JLabel lblNombre;
-    /*Puntos de ataque (ATK). */
+    //Puntos de ataque (ATK)
     private JLabel lblAtk;
-    /* Puntos de defensa (DEF). */
+    //Puntos de defensa (DEF)
     private JLabel lblDef;
-    /* Botón para que el jugador use esta carta en el turno. */
+    //Botón para que el jugador use esta carta en el turno
     private JButton btnElegir;
 
     {
@@ -79,20 +79,19 @@ public class CardPanel {
         return rootPanel;
     }
 
-    // ---- Comportamiento (fuera del código generado por el diseñador) ----
 
-    /* Tamaño con el que se dibuja la imagen (la de la API es de 168 x 246). */
+    //Tamaño con el que se dibuja la imagen (la de la API es de 168 x 246).
     private static final int IMG_W = 112;
     private static final int IMG_H = 164;
 
-    /* Carta que muestra este panel (null si está vacío). */
+    //Carta que muestra este panel (null si está vacío)
     private Card card;
 
     public CardPanel() {
         lblImagen.setPreferredSize(new Dimension(IMG_W, IMG_H));
     }
 
-    /* Muestra una carta con su imagen (si la imagen no cargó, se muestra un texto). */
+    // Muestra una carta con su imagen (si la imagen no cargó, se muestra un texto).
     public void showCard(Card card, ImageIcon image) {
         this.card = card;
         lblImagen.setEnabled(true);
@@ -105,7 +104,7 @@ public class CardPanel {
         lblDef.setText("DEF: " + card.getDef());
     }
 
-    /* Deja el panel vacío, como al abrir la aplicación. */
+    //Deja el panel vacío, como al abrir la aplicación.
     public void clear() {
         card = null;
         lblImagen.setEnabled(true);
@@ -117,7 +116,7 @@ public class CardPanel {
         btnElegir.setEnabled(false);
     }
 
-    /* Marca la carta como ya jugada: imagen en gris y botón deshabilitado. */
+    //Marca la carta como ya jugada: imagen en gris y botón deshabilitado.
     public void markUsed() {
         lblImagen.setEnabled(false);
         btnElegir.setEnabled(false);
@@ -127,7 +126,7 @@ public class CardPanel {
 
     public void setChooseEnabled(boolean enabled) { btnElegir.setEnabled(enabled); }
 
-    /* Las cartas de la máquina no se eligen, por eso se les oculta el botón. */
+    //Las cartas de la máquina no se eligen, por eso se les oculta el botón.
     public void setChooseVisible(boolean visible) { btnElegir.setVisible(visible); }
 
     public void addChooseListener(ActionListener listener) { btnElegir.addActionListener(listener); }

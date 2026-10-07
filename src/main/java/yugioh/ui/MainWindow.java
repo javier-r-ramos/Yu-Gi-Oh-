@@ -31,46 +31,46 @@ rchivo IntelliJ genera automáticamente el método $$$setupUI$$$(), que:
  CENTER: boardPanel (GridBagLayout) con dos filas que ocupan todo el espacio:
  fila 0 las cartas de la máquina y fila 1 las del jugador. Cada fila es un
  panel FlowLayout con borde titulado y 3 CardPanel anidados.
- EAST: scrollLog (320 px de ancho) que contiene el área de texto del log.
+ EAST: scrollLog (320 px de ancho) que contiene el área de texto del log
 
  No se debe editar $$$setupUI$$$() a mano: se reescribe al guardar el .form.
  */
 public class MainWindow implements BattleListener {
-    /*Panel raíz de la ventana. */
+    //Panel raíz de la ventana
     private JPanel mainPanel;
 
-    // ---- Zona superior: controles y estado del duelo ----
-    /*Panel superior que agrupa el botón y las etiquetas. */
+    //Zona superior: controles y estado del duelo
+    //Panel superior que agrupa el botón y las etiquetas.
     private JPanel topPanel;
-    /*Botón "Iniciar duelo". */
+    //Botón "Iniciar duelo".
     private JButton btnIniciarDuelo;
-    /*Puntaje acumulado: "Jugador X - Y Máquina". */
+    //Puntaje acumulado: "Jugador X - Y Máquina"
     private JLabel lblPuntaje;
-    /*Anuncio del ganador final del duelo (vacío mientras se juega). */
+    //Anuncio del ganador final del duelo (vacío mientras se juega)
     private JLabel lblGanador;
-    /*Mensajes de error visibles: "No se pudo cargar la carta", "error de red". */
+    //Mensajes de error visibles: "No se pudo cargar la carta", "error de red"
     private JLabel lblEstado;
 
-    // ---- Zona central: tablero con las cartas ----
-    /*Contenedor de las dos filas de cartas. */
+    //Zona central: tablero con las cartas
+    //Contenedor de las dos filas de cartas.
     private JPanel boardPanel;
-    /*Fila con las 3 cartas de la máquina. */
+    //Fila con las 3 cartas de la máquina.
     private JPanel aiCardsPanel;
-    /*Cartas de la máquina (formulario CardPanel anidado). */
+    //Cartas de la máquina (formulario CardPanel anidado)
     private CardPanel aiCard1;
     private CardPanel aiCard2;
     private CardPanel aiCard3;
-    /*Fila con las 3 cartas del jugador. */
+    //Fila con las 3 cartas del jugador.
     private JPanel playerCardsPanel;
-    /*Cartas del jugador (formulario CardPanel anidado). */
+    //Cartas del jugador (formulario CardPanel anidado)
     private CardPanel playerCard1;
     private CardPanel playerCard2;
     private CardPanel playerCard3;
 
-    // ---- Zona derecha: log de batalla ----
-    /** Barra de desplazamiento del log (JScrollPane). */
+    //Zona derecha: log de batalla
+    //Barra de desplazamiento del log (JScrollPane)
     private JScrollPane scrollLog;
-    /*Log de batalla: quién jugó qué carta, resultado del turno y puntaje. Solo lectura. */
+    //Log de batalla: quién jugó qué carta, resultado del turno y puntaje. Solo lectura
     private JTextArea txtLog;
 
     {
@@ -160,7 +160,7 @@ public class MainWindow implements BattleListener {
         return mainPanel;
     }
 
-    // ---- Comportamiento (fuera del código generado por el diseñador) ----
+    //Comportamiento
 
     private final YgoApiClient api = new YgoApiClient();
     private CardPanel[] playerPanels;
@@ -170,7 +170,7 @@ public class MainWindow implements BattleListener {
     private Duel duel;
     private int ronda;
 
-    /* Datos que se descargan en segundo plano antes de empezar el duelo. */
+    //Datos que se descargan en segundo plano antes de empezar el duelo
     private static class LoadedCards {
         final List<Card> playerCards = new ArrayList<>();
         final List<Card> aiCards = new ArrayList<>();
@@ -178,7 +178,7 @@ public class MainWindow implements BattleListener {
         final List<ImageIcon> aiImages = new ArrayList<>();
     }
 
-    /* Una carta ya descargada junto con su imagen (la imagen puede ser null). */
+    //Una carta ya descargada junto con su imagen (la imagen puede ser null)
     private static class LoadedCard {
         final Card card;
         final ImageIcon image;
@@ -216,7 +216,7 @@ public class MainWindow implements BattleListener {
         btnIniciarDuelo.addActionListener(e -> iniciarDuelo()); // ActionListener "Iniciar duelo"
     }
 
-    /* Crea el JFrame, le pone el panel principal y lo muestra. */
+    // Crea el JFrame, le pone el panel principal y lo muestra.
     public void mostrar() {
         JFrame frame = new JFrame("Yu-Gi-Oh! Duel Lite");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -230,7 +230,7 @@ public class MainWindow implements BattleListener {
         frame.setVisible(true);
     }
 
-    /* Descarga 3 cartas por bando SIN bloquear el hilo de la interfaz (SwingWorker). */
+    //Descarga 6 cartas
     private void iniciarDuelo() {
         btnIniciarDuelo.setEnabled(false);
         txtLog.setText("");
@@ -264,7 +264,7 @@ public class MainWindow implements BattleListener {
                     }
                     return data;
                 } catch (ExecutionException e) {
-                    // Se relanza la causa real (p. ej. IOException) para mostrar el error correcto
+                    // Se relanza la causa real para mostrar el error correcto
                     if (e.getCause() instanceof Exception) throw (Exception) e.getCause();
                     throw e;
                 } finally {
@@ -286,7 +286,7 @@ public class MainWindow implements BattleListener {
         }.execute();
     }
 
-    /* Descarga la imagen; si falla devuelve null y la carta se muestra sin imagen. */
+    //Descarga la imagen; si falla devuelve null y la carta se muestra sin imagen
     private ImageIcon cargarImagen(String url) {
         try {
             BufferedImage img = ImageIO.read(URI.create(url).toURL());
@@ -296,7 +296,7 @@ public class MainWindow implements BattleListener {
         }
     }
 
-    /* Ya están las 6 cartas: se muestran y se crea el duelo. */
+    //Ya están las 6 cartas: se muestran y se crea el duelo.
     private void empezarDuelo(LoadedCards data) {
         duel = new Duel(data.playerCards, data.aiCards, this);
         ronda = 0;
@@ -310,7 +310,7 @@ public class MainWindow implements BattleListener {
                 + (duel.isPlayerStarts() ? Duel.PLAYER : Duel.AI) + "\n\n");
     }
 
-    /* Se pulsó "Elegir carta" en una de las cartas del jugador. */
+    //Se pulsó "Elegir carta" en una de las cartas del jugador.
     private void elegirCarta(CardPanel panel) {
         if (duel == null || duel.isFinished()) return;
         panel.markUsed();
@@ -324,7 +324,7 @@ public class MainWindow implements BattleListener {
         }
     }
 
-    /* Error visible: "No se pudo cargar la carta" / "error de red". */
+    //Error visible: "No se pudo cargar la carta" / "error de red"
     private void mostrarError(Throwable error) {
         String detalle = error.getMessage() == null ? error.toString() : error.getMessage();
         String mensaje = (error instanceof IOException)
@@ -336,7 +336,7 @@ public class MainWindow implements BattleListener {
         JOptionPane.showMessageDialog(mainPanel, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    // ---- BattleListener: la lógica avisa y la ventana pinta ----
+    // BattleListener: la lógica avisa y la ventana pinta
 
     @Override
     public void onTurn(String playerCard, String aiCard, String winner) {
